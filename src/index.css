@@ -1,0 +1,25 @@
+body {
+  margin: 0;
+}
+
+.download-button {
+  width: 100%;
+}
+
+.img-column {
+  margin-bottom: 5rem;
+}
+
+.topbar-form {
+  z-index: 999;
+}
+
+.accordion-button:not(.collapsed)::after {
+  transform: rotate(0deg);
+}
+
+@media (max-width: 768px) {
+  .search-button {
+    width: 100%;
+  }
+}
