@@ -7,6 +7,7 @@ export default function MainPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [perPage, setperPage] = useState(10);
+  const [sortBy, setSortBy] = useState("Relevance");
   const [accordionToggle, setAccordionToggle] = useState(false);
   useEffect(async () => {
     if (searchTerm) {
@@ -96,30 +97,75 @@ export default function MainPage() {
     }
   }
 
-  function dropDownHelper(e) {
+  function dropDownHelper(e, type) {
     e.preventDefault();
     const { value } = e.target.attributes;
-    setperPage(value.nodeValue);
+    if (type === "per-page-dropdown") setperPage(value.nodeValue);
+    else if (type === "sort-dropdown") setSortBy(value.nodeValue);
   }
 
-  function options() {
-    let content = [];
-    for (let i = 10; i <= 30; i = i + 10) {
-      content.push(
-        <li key={i}>
+  function options(dropdown) {
+    if (dropdown === "per-page-dropdown") {
+      const content = [5, 10, 20, 30];
+      return content.map((item, index) => (
+        <li key={index}>
           <a
             className={
-              parseInt(perPage) === i ? "dropdown-item active" : "dropdown-item"
+              parseInt(perPage) === item
+                ? "dropdown-item active"
+                : "dropdown-item"
             }
-            value={i}
-            onClick={dropDownHelper}
+            value={item}
+            onClick={(e) => dropDownHelper(e, "per-page-dropdown")}
           >
-            {i}
+            {item}
           </a>
         </li>
-      );
+      ));
+    } else if (dropdown === "sort-dropdown") {
+      const content = [
+        "Relevance",
+        "Likes: More-To-Less",
+        "Likes: Less-To-More",
+        "Photos: More-To-Less",
+        "Photos: Less-To-More",
+      ];
+      return content.map((item, index) => (
+        <li key={index}>
+          <a
+            className={
+              sortBy === item ? "dropdown-item active" : "dropdown-item"
+            }
+            value={item}
+            onClick={(e) => dropDownHelper(e, "sort-dropdown")}
+          >
+            {item}
+          </a>
+        </li>
+      ));
     }
-    return content;
+  }
+
+  function sortHelper() {
+    if (sortBy === "Relevance") {
+      return data;
+    } else if (sortBy === "Likes: More-To-Less") {
+      const tempData = [...data];
+      tempData.sort((a, b) => b.user.total_likes - a.user.total_likes); //Desending
+      return tempData;
+    } else if (sortBy === "Likes: Less-To-More") {
+      const tempData = [...data];
+      tempData.sort((a, b) => a.user.total_likes - b.user.total_likes); //Ascending
+      return tempData;
+    } else if (sortBy === "Photos: More-To-Less") {
+      const tempData = [...data];
+      tempData.sort((a, b) => b.user.total_photos - a.user.total_photos); //Desending
+      return tempData;
+    } else if (sortBy === "Photos: Less-To-More") {
+      const tempData = [...data];
+      tempData.sort((a, b) => a.user.total_photos - b.user.total_photos); //Ascending
+      return tempData;
+    }
   }
 
   return (
@@ -148,8 +194,8 @@ export default function MainPage() {
           </div>
         </div>
         <div className="row">
-          <div className="dropdown col-sm-12 col-md-12 col-lg-12">
-            <label className="form-label me-2">Images per page</label>
+          <div className="dropdown col-6 col-sm-6 col-md-6 col-lg-6 per-page-dropdown">
+            <label className="form-label me-2">Images per page:</label>
             <button
               className="btn btn-primary dropdown-toggle"
               type="button"
@@ -160,14 +206,34 @@ export default function MainPage() {
               {perPage}
             </button>
             <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-              {options()}
+              {options("per-page-dropdown")}
             </ul>
+          </div>
+          <div className="dropdown col-6 col-sm-6 col-md-6 col-lg-6 sort-dropdown">
+            <div className="sort-dropdown-inner-div">
+              <label className="form-label me-2">Sort By:</label>
+              <button
+                className="btn btn-primary dropdown-toggle"
+                type="button"
+                id="dropdownMenuButton2"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                {sortBy}
+              </button>
+              <ul
+                className="dropdown-menu"
+                aria-labelledby="dropdownMenuButton1"
+              >
+                {options("sort-dropdown")}
+              </ul>
+            </div>
           </div>
         </div>
       </form>
       <div className="row">
-        {data.length > 0 ? (
-          data.map((item) => {
+        {sortHelper().length > 0 ? (
+          sortHelper().map((item) => {
             if (
               item.user.instagram_username !== ("@anakin1814" || "@hamzaports")
             ) {
@@ -187,20 +253,31 @@ export default function MainPage() {
                         Download
                       </a>
                     </div>
-                    {item.user.instagram_username ? (
-                      ""
-                    ) : (
+                    {!item.user.instagram_username && (
                       <b className="text-capitalize" style={{ color: "red" }}>
                         No userId
                       </b>
                     )}
-                    {item.alt_description ? (
-                      ""
-                    ) : (
+                    {!item.alt_description && (
                       <b className="text-capitalize" style={{ color: "blue" }}>
                         No Hashtags
                       </b>
                     )}
+                    {!item.user.location && (
+                      <b
+                        className="text-capitalize"
+                        style={{ color: "darkorange" }}
+                      >
+                        No Location
+                      </b>
+                    )}
+                    {item.user.location && (
+                      <>
+                        <h4>Location is:</h4>
+                        <div>{item.user.location}</div>
+                      </>
+                    )}
+                    <h4>Hashtags from here:</h4>
                     <div>shot_on_my_camera,</div>
                     <div>india,</div>
                     <div>photography,</div>

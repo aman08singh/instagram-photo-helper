@@ -18,8 +18,6 @@ body {
   transform: rotate(0deg);
 }
 
-@media (max-width: 768px) {
-  .search-button {
-    width: 100%;
-  }
+.search-button {
+  width: 100%;
 }
